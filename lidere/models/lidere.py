@@ -146,7 +146,8 @@ class ImplicitNet(nn.Module):
                 return torch.sin(x)
         
         layers = [nn.Linear(inputs, dim), Sine()]
-        layers += [nn.Linear(dim, dim), Sine()]*n_hidden
+        for _ in range(n_hidden):
+            layers += [nn.Linear(dim, dim), Sine()]
         layers += [nn.Linear(dim, n_heads)]
         self.net = nn.Sequential(*layers)
         self.skip = nn.Linear(inputs, n_heads, bias=False)
