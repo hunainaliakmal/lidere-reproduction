@@ -1,55 +1,23 @@
-# LiDeRe Reproduction Project
-
-This repository holds my one week project for the Beihang University computer vision group. I reproduce a CVPR 2026 paper and test it on new data.
-
-## The paper
-
-LiDeRe: A Lightweight Readout for Fast and Data Efficient Dense Prediction
-Authors: Timo Luddecke and colleagues (University of Goettingen)
-Venue: CVPR 2026
-Official code: https://github.com/timojl/lidere
-
-The idea is simple. A large pretrained vision model stays frozen. Only a tiny readout on top of it is trained. Training is fast and it works with very few labeled images.
-
-## What is in this repository
-
-The lidere folder and the files in the main folder come from the authors. They are their official code. My own work is here:
-
-1. experiments holds my notebooks
-2. results holds my numbers and pictures
-3. reports holds the final report
-4. LOG.md holds my daily work log
-
-## What I did
-
-1. Ran the authors inference demo on a Kaggle GPU
-2. Trained the readout on the four example images from the authors
-3. Reproduced the Leaf Disease Segmentation experiment (399 training and 90 test images)
-4. Tested the method on a small remote sensing dataset with only a few labeled images (planned)
-
-## Results
-
-Leaf Disease Segmentation
-Paper result: to be added
-My result: to be added
-
-Remote sensing experiment: to be added
-
-## How to run
-
-1. Open a Kaggle notebook and turn on the GPU and internet
-2. Clone the authors code: git clone https://github.com/timojl/lidere
-3. Download the Leaf data from https://automl-mm-bench.s3.amazonaws.com/semantic_segmentation/leaf_disease_segmentation.zip and unzip it into a folder called data
-4. Set the DATA_ROOT variable to that data folder
-5. Open the notebook in the experiments folder and run the cells in order
-
-## Differences from the paper
-
-1. I used a ViT B backbone because it fits on a free GPU
-2. Images are resized to 512 pixels
-3. I trained for 500 steps with batch size 16
-4. Weight decay is 0 because the authors code uses 0
-
-## Credits
-
-All credit for the method and the code goes to the original authors. Their code uses the MIT license. The model weights have their own license.
+Oct 2: Set up VS Code, Python and Git. Cloned the LiDeRe code. Created my GitHub repo.
+Next: run the demo on a Kaggle GPU.
+Oct 2: Kaggle notebook with 2x Tesla T4 works. Ran LiDeRe inference demo (contour prediction). Long missing_keys message is expected because the 5 MB file holds only the readout.
+Next: train on 4 images, then reproduce one paper experiment.
+Oct 2: Training demo failed with an OSError while loading an example image (the one-line wget download was unreliable). Fixed by downloading each file separately and checking it opens.
+## Oct 2
+- Set up VS Code, Python and Git. Created my GitHub repo.
+- Set up a Kaggle notebook with 2x Tesla T4 GPU.
+- Ran the LiDeRe inference demo (contour prediction). Result saved in results/contour.png.
+- Problem: training demo failed with "image file is truncated". The one-line download of the example images was unreliable.
+- Fix: downloaded each file separately and checked that it opens. All 8 files are fine now.
+- Next: train on the 4 example images, then reproduce one experiment from the paper.
+- Training failed again with "image file is truncated" inside the DataLoader worker. Cause: images were opened lazily and shared between worker processes. Fix: load images fully into memory and use num_workers=0.                                                         
+- Kaggle session restarted and lost the model. Fixed by rebuilding everything in one cell: clone code, download the example images, train for 300 iterations, predict the cow image.
+- Prediction on the cow image looks correct after resizing the low-resolution mask to 512x512. This image was in the training set, so it only shows the training works.
+## Oct 2 (night)
+- "Dataset not found" message: the zip was downloaded but not unzipped into DATA_ROOT/leaf_disease_segmentation. Fixed by extracting it.
+- Read the repo source to match the paper setup. Deviations: ViT-B backbone, 512 px, 500 steps, batch 16, weight decay 0.
+- Ran the Leaf cell on the laptop by mistake: "Torch not compiled with CUDA enabled" (no GPU). Training must run in Kaggle. Data loading worked locally: 399 train and 90 test images.
+## Oct 3
+- Leaf experiment finished on Kaggle (T4, about 8 minutes). Settings: ViT-B backbone, 512 px, 500 steps, batch size 16, learning rate 0.001.
+- Test results on 90 images: mIoU 0.816, disease IoU 0.692, background IoU 0.940, pixel accuracy 0.947.
+- Still to do: compare with the paper table and run the remote sensing experiment.
