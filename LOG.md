@@ -10,3 +10,6 @@ Oct 2: Training demo failed with an OSError while loading an example image (the 
 - Problem: training demo failed with "image file is truncated". The one-line download of the example images was unreliable.
 - Fix: downloaded each file separately and checked that it opens. All 8 files are fine now.
 - Next: train on the 4 example images, then reproduce one experiment from the paper.
+- Training failed again with "image file is truncated" inside the DataLoader worker. Cause: images were opened lazily and shared between worker processes. Fix: load images fully into memory and use num_workers=0.                                                         
+- Kaggle session restarted and lost the model. Fixed by rebuilding everything in one cell: clone code, download the example images, train for 300 iterations, predict the cow image.
+- Prediction on the cow image looks correct after resizing the low-resolution mask to 512x512. This image was in the training set, so it only shows the training works.
